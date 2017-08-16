@@ -5,29 +5,30 @@ from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
 
 def svm_train_predict(cate_name):
+    # percentage of training set in dataset
+    validation_split = 0.8
 
-    train_rate = 0.8
-    corpus = []
+    # load data
     pos_lines = open('./%s_pos.txt' % cate_name).readlines()
     num_pos = len(pos_lines)
     neu_lines = open('./%s_neu.txt' % cate_name).readlines()
     num_neu = len(neu_lines)
     neg_lines = open('./%s_neg.txt' % cate_name).readlines()
     num_neg = len(neg_lines)
-
     num_all = num_pos + num_neu + num_neg
     print('num_pos: %s' % num_pos)
     print('num_neu: %s' % num_neu)
     print('num_neg: %s' % num_neg)
     print('num_all: %s' % num_all)
-    print('pecentage_pos: %s' % str(num_pos / num_all))
-    print('pecentage_neu: %s' % str(num_neu / num_all))
-    print('pecentage_neg: %s' % str(num_neg / num_all))
+    print('percentage_pos: %s' % str(num_pos / num_all))
+    print('percentage_neu: %s' % str(num_neu / num_all))
+    print('percentage_neg: %s' % str(num_neg / num_all))
+    train_point_pos = int(num_pos * validation_split)
+    train_point_neu = int(num_pos + num_neu * validation_split)
+    train_point_neg = int(num_pos + num_neu + num_neg * validation_split)
 
-    train_point_pos = int(num_pos * train_rate)
-    train_point_neu = int(num_pos + num_neu * train_rate)
-    train_point_neg = int(num_pos + num_neu + num_neg * train_rate)
-
+    # build the dataset
+    corpus = []
     y = []
     for line in pos_lines:
         corpus.append(' '.join(jieba.cut(line.replace('\n', ''))))
@@ -39,6 +40,7 @@ def svm_train_predict(cate_name):
         corpus.append(' '.join(jieba.cut(line.replace('\n', ''))))
         y.append(3)
 
+    # transform the dataset to the bag_of_word format
     vectorizer = CountVectorizer(min_df=1)
     X = vectorizer.fit_transform(corpus).toarray()
     y = np.array(y)
@@ -49,7 +51,7 @@ def svm_train_predict(cate_name):
     print('----> Shape of label <----')
     print(y.shape)
 
-
+    # build training set and test set
     X_train = []
     y_train = []
     X_train.extend(X[0:train_point_pos])
@@ -78,12 +80,12 @@ def svm_train_predict(cate_name):
     clf.fit(X_train, y_train)
     y_predict = clf.predict(X_test)
 
+    # calculate the accuracy
     y_predict = np.array(y_predict)
     y_test = np.array(y_test)
     diff = y_predict - y_test
     predict_true = list(filter(lambda n: n == 0, diff))
     accu = len(predict_true) / len(y_predict)
-
 
     print('Num of predict:')
     print(len(y_predict))
@@ -95,10 +97,8 @@ def svm_train_predict(cate_name):
     print(accu)
 
 
-
-
 if __name__ == '__main__':
-    svm_train_predict('env')
+    svm_train_predict('price')
 
 
 
