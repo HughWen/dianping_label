@@ -1,12 +1,14 @@
 from sklearn import svm
 import jieba
-import re
 from sklearn.feature_extraction.text import CountVectorizer
 import numpy as np
+import random
 
 def svm_train_predict(cate_name):
     # percentage of training set in dataset
     validation_split = 0.8
+    # random seed
+    seed_random = 7
 
     # load data
     pos_lines = open('./%s_pos.txt' % cate_name).readlines()
@@ -52,15 +54,18 @@ def svm_train_predict(cate_name):
     print(y.shape)
 
     # build training set and test set
-    X_train = []
+    x_train = []
     y_train = []
-    X_train.extend(X[0:train_point_pos])
-    X_train.extend(X[num_pos:train_point_neu])
-    X_train.extend(X[num_pos + num_neu:train_point_neg])
+    x_train.extend(X[0:train_point_pos])
+    x_train.extend(X[num_pos:train_point_neu])
+    x_train.extend(X[num_pos + num_neu:train_point_neg])
 
     y_train.extend(y[0:train_point_pos])
     y_train.extend(y[num_pos:train_point_neu])
     y_train.extend(y[num_pos + num_neu:train_point_neg])
+
+    random.Random(seed_random).shuffle(x_train)
+    random.Random(seed_random).shuffle(y_train)
 
     X_test = []
     y_test = []
@@ -72,12 +77,12 @@ def svm_train_predict(cate_name):
     y_test.extend(y[train_point_neu:num_pos + num_neu])
     y_test.extend(y[train_point_neg:num_pos + num_neu + num_neg])
 
-    print('Num of training set: %s' % len(X_train))
+    print('Num of training set: %s' % len(x_train))
 
     print('Num of test set: %s' % len(X_test))
 
     clf = svm.SVC()
-    clf.fit(X_train, y_train)
+    clf.fit(x_train, y_train)
     y_predict = clf.predict(X_test)
 
     # calculate the accuracy
