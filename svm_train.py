@@ -24,14 +24,14 @@ def svm_train_predict(cate_name):
     pos_corpus = []
     neu_corpus = []
     neg_corpus = []
-    for line in pos_lines[:330]:
+    for line in pos_lines:
         pos_corpus.append(' '.join(jieba.cut(line.replace('\n', ''))))
         y.append(1)
-    for i in range(1):
-        for line in neu_lines[:330]:
+    for i in range(3):
+        for line in neu_lines:
             neu_corpus.append(' '.join(jieba.cut(line.replace('\n', ''))))
             y.append(2)
-    for i in range(1):
+    for i in range(12):
         for line in neg_lines:
             neg_corpus.append(' '.join(jieba.cut(line.replace('\n', ''))))
             y.append(3)
@@ -61,9 +61,9 @@ def svm_train_predict(cate_name):
     y = np.array(y)
     x = np.array(x)
 
-    # print('----> PCA <----')
-    # pca = PCA(n_components=50)
-    # x = pca.fit_transform(x)
+    print('----> PCA <----')
+    pca = PCA(n_components=50)
+    x = pca.fit_transform(x)
 
     print('----> Shape of data set: <----')
     print(x.shape)
