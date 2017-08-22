@@ -9,7 +9,7 @@ from keras import regularizers
 from keras.layers import Embedding
 from keras.layers import LSTM
 from keras.preprocessing import text, sequence
-import utils
+import code.utils as utils
 
 # ======== parameters part start ========
 # k_fold value
