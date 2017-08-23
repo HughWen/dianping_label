@@ -139,9 +139,11 @@ def lstm_training_predict(training_set, training_label, test_set, test_label):
 
 def train_test():
     data_cv = build_data_cv('./food_pos.txt', './food_neu.txt', './food_neg.txt', cv=k_fold)
-    random.Random(rand_seed).shuffle(data_cv)# shuffle
+    random.Random(rand_seed).shuffle(data_cv)  # shuffle
     # k time training and test
     for i in range(k_fold):
+        print('fold %s' % i)
+        accu_list = []
         training_set = []
         training_y = []
         test_set = []
@@ -149,7 +151,6 @@ def train_test():
         for doc in data_cv:
             if doc['split'] == i:
                 test_set.append(doc['text'])
-
                 test_y.append(doc['y'])
             else:
                 training_set.append(doc['text'])
@@ -157,7 +158,8 @@ def train_test():
         print("Train/Test split: {:d}/{:d}".format(len(training_y), len(test_y)))
         training_y = list(map(trans_label, training_y))
         # train and test
-        training_predict(training_set, training_y, test_set, test_y)
+        accu_list.append(lstm_training_predict(training_set, training_y, test_set, test_y))
+    print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
 
 
 
