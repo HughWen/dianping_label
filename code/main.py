@@ -185,7 +185,7 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
     if model_name == 'lstm':
         # k fold cross validation in lstm w2v
         for i in range(k_fold):
-            print('fold %s' % i)
+            print('======== fold %s ========' % i)
             x_training = []
             y_training = []
             x_test = []
@@ -206,7 +206,7 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
     elif model_name == 'svm':
         # k fold cross validation in svm
         for i in range(k_fold):
-            print('fold %s' % i)
+            print('======== fold %s ========' % i)
             x_training = []
             y_training = []
             x_test = []
