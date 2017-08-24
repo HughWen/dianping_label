@@ -13,4 +13,7 @@ service | svm + pca | 1058 | 5 | 66.30
 all | svm + pca | 9530 | 5 | 71.59
 -- | -- | -- | -- | --
 food | lstm | 5619 | 5 | 80.55
-env | lstm | 1174 | 5 | 
+env | lstm | 1174 | 5 | 70.17
+price | lstm | 1679 | 5 | 68.66
+service | lstm | 1058 | 5 | 71.71
+all | lstm | 9530 | 5 | 76.19
