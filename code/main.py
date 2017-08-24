@@ -1,15 +1,8 @@
 import numpy as np
 import random
-import time
 import jieba
-import gensim
-from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation
-from keras import regularizers
-from keras.layers import Embedding
-from keras.layers import LSTM
-from keras.preprocessing import text, sequence
-import code.utils as utils
+import time
+import utils
 
 # ======== parameters part start ========
 # k_fold value
@@ -43,12 +36,12 @@ shuffle = True
 # ======== parameter part end ========
 
 
-def build_data_cv(pos_file, neu_file, neg_file, cv=10):
+def build_data_cv(f_pos, f_neu, f_neg, cv=10):
     """
     Loads the data and split into k folds.
     """
     docs = []
-    with open(pos_file) as f:
+    with open(f_pos) as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
@@ -56,7 +49,7 @@ def build_data_cv(pos_file, neu_file, neg_file, cv=10):
                 'text': line,
                 'split': np.random.randint(0, cv)}
             docs.append(doc)
-    with open(neu_file) as f:
+    with open(f_neu) as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
@@ -65,7 +58,7 @@ def build_data_cv(pos_file, neu_file, neg_file, cv=10):
                 'split': np.random.randint(0, cv)
             }
             docs.append(doc)
-    with open(neg_file) as f:
+    with open(f_neg) as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
@@ -88,19 +81,27 @@ def trans_label(i):
         raise Exception('No this label!')
 
 
-def lstm_training_predict(training_set, training_label, test_set, test_label):
+def lstm_training_predict(set_traning, label_training, set_test, label_test):
+    import gensim
+    from keras.models import Sequential
+    from keras.layers import Dense, Dropout, Activation
+    from keras import regularizers
+    from keras.layers import Embedding
+    from keras.layers import LSTM
+    from keras.preprocessing import text, sequence
+
     # cut sentences to words
-    training_x = np.array(list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), training_set)))
-    training_y = np.array(training_label)
-    test_x = np.array(list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), test_set)))
-    test_y = np.array(test_label)
+    x_training = np.array(list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), set_traning)))
+    y_training = np.array(label_training)
+    x_test = np.array(list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), set_test)))
+    y_test = np.array(label_test)
 
     # Build vocabulary & sequences
     tk = text.Tokenizer(num_words=max_features)
-    tk.fit_on_texts(training_x)
-    training_x = tk.texts_to_sequences(training_x)
+    tk.fit_on_texts(x_training)
+    x_training = tk.texts_to_sequences(x_training)
     word_index = tk.word_index
-    training_x = sequence.pad_sequences(training_x, maxlen=max_len)
+    x_training = sequence.pad_sequences(x_training, maxlen=max_len)
 
     # Build pre-trained embedding layer
     w2v = gensim.models.Word2Vec.load(utils.get_w2v_model_path('dianping/dianping.model'))
@@ -120,71 +121,111 @@ def lstm_training_predict(training_set, training_label, test_set, test_label):
                   optimizer=optimizer,
                   metrics=['accuracy'])
     print('============ LSTM w2v model training begin ===============')
-    model.fit(training_x, training_y, batch_size=batch_size, epochs=num_epoch, validation_split=validation_split, shuffle=shuffle)
+    model.fit(x_training, y_training, batch_size=batch_size, epochs=num_epoch, validation_split=validation_split, shuffle=shuffle)
     print('============ LSTM w2v model training finish ==============')
 
-    test_x = tk.texts_to_sequences(test_x)
-    test_x = sequence.pad_sequences(test_x, maxlen=max_len)
-    predict_y = model.predict(test_x)
-    predict_y = np.array(list(map(lambda n: n.argmax() + 1, predict_y)))
-    diff = predict_y - test_y
+    x_test = tk.texts_to_sequences(x_test)
+    x_test = sequence.pad_sequences(x_test, maxlen=max_len)
+    y_predict = model.predict(x_test)
+    y_predict = np.array(list(map(lambda n: n.argmax() + 1, y_predict)))
+    diff = y_predict - y_test
     predict_true = list(filter(lambda n: n == 0, diff))
-    accu = len(predict_true) / len(predict_y)
-    print(accu)
+    accu = len(predict_true) / len(y_predict)
+    print('accuracy is', accu)
     return accu
 
     # model.save(filepath=utils.get_model_path(model_name))
     # print('model was saved to ' + utils.get_model_path(model_name))
 
 
-def svm_training_predict():
-    pass
+def svm_training_predict(training_set, label_training, set_test, label_test, pca_flag=False):
+    from sklearn import svm
+    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.decomposition import PCA
+
+    x_training = list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), training_set))
+    y_training = np.array(label_training)
+    y_test = np.array(label_test)
+    x_test = list(map(lambda n: ' '.join(jieba.cut(n.replace('\n', ''))), set_test))
+
+    # transform the dataset to the bag_of_word format
+    vectorizer = CountVectorizer(min_df=1)
+    x_training = vectorizer.fit_transform(x_training).toarray()
+    x_test = vectorizer.transform(x_test).toarray()
+    if pca_flag:
+        print('==== PCA ====')
+        pca  = PCA(n_components=50)
+        x_training = pca.fit_transform(x_training)
+        clf = svm.SVC(decision_function_shape='ovo')
+        clf.fit(x_training, y_training)
+        x_test = pca.transform(x_test)
+        y_predict = clf.predict(x_test)
+        y_predict = np.array(y_predict)
+        diff = y_predict - y_test
+        predict_ture = list(filter(lambda n: n == 0, diff))
+        accu = len(predict_ture) / len(y_predict)
+        print('accuracy is', accu)
+        return accu
+    else:
+        clf = svm.SVC(decision_function_shape='ovo')
+        clf.fit(x_training, y_training)
+        y_predict = clf.predict(x_test)
+        y_predict = np.array(y_predict)
+        diff = y_predict - y_test
+        predict_ture = list(filter(lambda n: n == 0, diff))
+        accu = len(predict_ture) / len(y_predict)
+        print('accuracy is', accu)
+        return accu
 
 
-def train_test():
-    data_cv = build_data_cv('./food_pos.txt', './food_neu.txt', './food_neg.txt', cv=k_fold)
+def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
+    data_cv = build_data_cv(f_pos, f_neu, f_neg, cv=k_fold)
     random.Random(rand_seed).shuffle(data_cv)  # shuffle
-    # k fold cross validation in lstm w2v
-    # for i in range(k_fold):
-    #     print('fold %s' % i)
-    #     accu_list = []
-    #     training_set = []
-    #     training_y = []
-    #     test_set = []
-    #     test_y = []
-    #     for doc in data_cv:
-    #         if doc['split'] == i:
-    #             test_set.append(doc['text'])
-    #             test_y.append(doc['y'])
-    #         else:
-    #             training_set.append(doc['text'])
-    #             training_y.append(doc['y'])
-    #     print("Train/Test split: {:d}/{:d}".format(len(training_y), len(test_y)))
-    #     training_y = list(map(trans_label, training_y))
-    #     # train and test
-    #     accu_list.append(lstm_training_predict(training_set, training_y, test_set, test_y))
-    # print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
-
-    # k fold cross validation in svm
-    for i in range(k_fold):
-        print('fold%s' % i)
-        accu_list = []
-        training_set = []
-        training_y = []
-        test_set = []
-        test_y = []
-        for doc in data_cv:
-            if doc['split'] == i:
-                test_set.append(doc['text'])
-                test_y.append(doc['y'])
-            else:
-                training_set.append(doc['text'])
-                training_y.append(doc['y'])
-            print("Train/Test split: {:d}/{:d}".format(len(training_y), len(test_y)))
-            training_y = list(map(trans_label, training_y))
+    accu_list = []
+    if model_name == 'lstm':
+        # k fold cross validation in lstm w2v
+        for i in range(k_fold):
+            print('fold %s' % i)
+            x_training = []
+            y_training = []
+            x_test = []
+            y_test = []
+            for doc in data_cv:
+                if doc['split'] == i:
+                    x_test.append(doc['text'])
+                    y_test.append(doc['y'])
+                else:
+                    x_training.append(doc['text'])
+                    y_training.append(doc['y'])
+            print("Train/Test split: {:d}/{:d}".format(len(y_training), len(y_test)))
+            y_training = list(map(trans_label, y_training))
             # train and test
+            accu_list.append(lstm_training_predict(x_training, y_training, x_test, y_test))
+        print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
 
+    elif model_name == 'svm':
+        # k fold cross validation in svm
+        for i in range(k_fold):
+            print('fold %s' % i)
+            x_training = []
+            y_training = []
+            x_test = []
+            y_test = []
+            for doc in data_cv:
+                if doc['split'] == i:
+                    x_test.append(doc['text'])
+                    y_test.append(doc['y'])
+                else:
+                    x_training.append(doc['text'])
+                    y_training.append(doc['y'])
+            print("Train/Test split: {:d}/{:d}".format(len(y_training), len(y_test)))
+            # train and test
+            accu_list.append(svm_training_predict(x_training, y_training, x_test, y_test, pca_flag=pca_flag))
+        print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
+
+    else:
+        print('not this model')
 
 
 if __name__ == '__main__':
-    train_test()
+    train_test('./data/food_pos.txt', './data/food_neu.txt', './data/food_neg.txt', model_name='svm', pca_flag=True)

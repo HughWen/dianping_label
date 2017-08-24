@@ -1,4 +1,4 @@
-import code.config as config
+import config
 import os
 
 
