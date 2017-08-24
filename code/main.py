@@ -228,4 +228,4 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
 
 
 if __name__ == '__main__':
-    train_test('./data/food_pos.txt', './data/food_neu.txt', './data/food_neg.txt', model_name='svm', pca_flag=True)
+    train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='svm', pca_flag=True)
