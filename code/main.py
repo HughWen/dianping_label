@@ -30,12 +30,13 @@ optimizer = 'rmsprop'
 
 # Training parameters
 batch_size = 128
-num_epoch = 10
+num_epoch = 50
 validation_split = 0
 shuffle = True
 # ======== parameter part end ========
 
 
+# build dataset, give each sentence a split number for the cross validation
 def build_data_cv(f_pos, f_neu, f_neg, cv=10):
     """
     Loads the data and split into k folds.
@@ -70,6 +71,7 @@ def build_data_cv(f_pos, f_neu, f_neg, cv=10):
     return docs
 
 
+# transform the label to probability in each polarity
 def trans_label(i):
     if i == 1:
         return [1, 0, 0]
@@ -81,6 +83,7 @@ def trans_label(i):
         raise Exception('No this label!')
 
 
+# the main code of lstm train and test, return a final accuracy
 def lstm_training_predict(set_traning, label_training, set_test, label_test):
     import gensim
     from keras.models import Sequential
@@ -138,6 +141,7 @@ def lstm_training_predict(set_traning, label_training, set_test, label_test):
     # print('model was saved to ' + utils.get_model_path(model_name))
 
 
+# the main code of svm train and test, return a final accuracy
 def svm_training_predict(training_set, label_training, set_test, label_test, pca_flag=False):
     from sklearn import svm
     from sklearn.feature_extraction.text import CountVectorizer
@@ -178,7 +182,8 @@ def svm_training_predict(training_set, label_training, set_test, label_test, pca
         return accu
 
 
-def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
+# the code of train and test
+def train_test(f_pos, f_neu, f_neg, model_name, pca_flag=False):
     data_cv = build_data_cv(f_pos, f_neu, f_neg, cv=k_fold)
     random.Random(rand_seed).shuffle(data_cv)  # shuffle
     accu_list = []
@@ -228,4 +233,5 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag):
 
 
 if __name__ == '__main__':
-    train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='svm', pca_flag=True)
+    # train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='svm', pca_flag=True)
+    train_test('./data/food_pos.txt', './data/food_neu.txt', './data/food_neg.txt', model_name='lstm')
