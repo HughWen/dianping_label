@@ -240,9 +240,9 @@ if __name__ == '__main__':
     cate_all = ['dc_appear', 'dc_quality', 'dc_cost_p', 'dc_perf', 'dc_price']
     pola_all = ['pos', 'neu', 'neg']
     for cate in cate_all:
-        f_pos = ('./data/%s_%s.txt' % (cate, pola_all[0]))
-        f_neu = ('./data/%s_%s.txt' % (cate, pola_all[1]))
-        f_neg = ('./data/%s_%s.txt' % (cate, pola_all[2]))
+        f_pos = ('./data/dc/%s_%s.txt' % (cate, pola_all[0]))
+        f_neu = ('./data/dc/%s_%s.txt' % (cate, pola_all[1]))
+        f_neg = ('./data/dc/%s_%s.txt' % (cate, pola_all[2]))
         result_svm_pca = 'pca_' + train_test(f_pos, f_neu, f_neg, model_name='svm', pca_flag=True)
         result_svm = train_test(f_pos, f_neu, f_neg, model_name='svm', pca_flag=False)
         result_lstm = train_test(f_pos, f_neu, f_neg, model_name='lstm')
