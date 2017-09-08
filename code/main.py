@@ -33,6 +33,8 @@ batch_size = 128
 num_epoch = 50
 validation_split = 0
 shuffle = True
+
+
 # ======== parameter part end ========
 
 
@@ -124,7 +126,8 @@ def lstm_training_predict(set_traning, label_training, set_test, label_test):
                   optimizer=optimizer,
                   metrics=['accuracy'])
     print('============ LSTM w2v model training begin ===============')
-    model.fit(x_training, y_training, batch_size=batch_size, epochs=num_epoch, validation_split=validation_split, shuffle=shuffle)
+    model.fit(x_training, y_training, batch_size=batch_size, epochs=num_epoch, validation_split=validation_split,
+              shuffle=shuffle)
     print('============ LSTM w2v model training finish ==============')
 
     x_test = tk.texts_to_sequences(x_test)
@@ -158,7 +161,7 @@ def svm_training_predict(training_set, label_training, set_test, label_test, pca
     x_test = vectorizer.transform(x_test).toarray()
     if pca_flag:
         print('==== PCA ====')
-        pca  = PCA(n_components=50)
+        pca = PCA(n_components=50)
         x_training = pca.fit_transform(x_training)
         clf = svm.SVC(decision_function_shape='ovo')
         clf.fit(x_training, y_training)
@@ -207,7 +210,6 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag=False):
             # train and test
             accu_list.append(lstm_training_predict(x_training, y_training, x_test, y_test))
         print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
-
     elif model_name == 'svm':
         # k fold cross validation in svm
         for i in range(k_fold):
@@ -227,11 +229,25 @@ def train_test(f_pos, f_neu, f_neg, model_name, pca_flag=False):
             # train and test
             accu_list.append(svm_training_predict(x_training, y_training, x_test, y_test, pca_flag=pca_flag))
         print('Final average accuracy: %s in %s fold cross validation' % (str(sum(accu_list) / len(accu_list)), k_fold))
-
     else:
         print('not this model')
 
+    return model_name + '\t' + (str(sum(accu_list) / len(accu_list))) + '\t' + f_pos + '\t' + f_neu + '\t' +f_neg
+
 
 if __name__ == '__main__':
+    result_txt = open('result', 'w')
+    cate_all = ['dc_appear', 'dc_quality', 'dc_cost_p', 'dc_perf', 'dc_price']
+    pola_all = ['pos', 'neu', 'neg']
+    for cate in cate_all:
+        f_pos = ('./data/%s_%s.txt' % (cate, pola_all[0]))
+        f_neu = ('./data/%s_%s.txt' % (cate, pola_all[1]))
+        f_neg = ('./data/%s_%s.txt' % (cate, pola_all[2]))
+        result_svm_pca = 'pca_' + train_test(f_pos, f_neu, f_neg, model_name='svm', pca_flag=True)
+        result_svm = train_test(f_pos, f_neu, f_neg, model_name='svm', pca_flag=False)
+        result_lstm = train_test(f_pos, f_neu, f_neg, model_name='lstm')
+        result_txt.write(result_svm_pca + '\n')
+        result_txt.write(result_svm + '\n')
+        result_txt.write(result_lstm + '\n')
     # train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='svm', pca_flag=True)
-    train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='lstm')
+    # train_test('./data/ser_pos.txt', './data/ser_neu.txt', './data/ser_neg.txt', model_name='lstm')
