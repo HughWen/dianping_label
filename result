@@ -1,0 +1,15 @@
+pca_svm	0.8980131155264781	./data/dc/dc_appear_pos.txt	./data/dc/dc_appear_neu.txt	./data/dc/dc_appear_neg.txt
+svm	0.9003500454197099	./data/dc/dc_appear_pos.txt	./data/dc/dc_appear_neu.txt	./data/dc/dc_appear_neg.txt
+lstm	0.8967055035900138	./data/dc/dc_appear_pos.txt	./data/dc/dc_appear_neu.txt	./data/dc/dc_appear_neg.txt
+pca_svm	0.6032828979637983	./data/dc/dc_quality_pos.txt	./data/dc/dc_quality_neu.txt	./data/dc/dc_quality_neg.txt
+svm	0.4757740577126766	./data/dc/dc_quality_pos.txt	./data/dc/dc_quality_neu.txt	./data/dc/dc_quality_neg.txt
+lstm	0.6055542764159809	./data/dc/dc_quality_pos.txt	./data/dc/dc_quality_neu.txt	./data/dc/dc_quality_neg.txt
+pca_svm	0.81573577735759	./data/dc/dc_cost_p_pos.txt	./data/dc/dc_cost_p_neu.txt	./data/dc/dc_cost_p_neg.txt
+svm	0.8212850566990186	./data/dc/dc_cost_p_pos.txt	./data/dc/dc_cost_p_neu.txt	./data/dc/dc_cost_p_neg.txt
+lstm	0.8440796938910144	./data/dc/dc_cost_p_pos.txt	./data/dc/dc_cost_p_neu.txt	./data/dc/dc_cost_p_neg.txt
+pca_svm	0.6887119825360017	./data/dc/dc_perf_pos.txt	./data/dc/dc_perf_neu.txt	./data/dc/dc_perf_neg.txt
+svm	0.6594353974057945	./data/dc/dc_perf_pos.txt	./data/dc/dc_perf_neu.txt	./data/dc/dc_perf_neg.txt
+lstm	0.7074374610776512	./data/dc/dc_perf_pos.txt	./data/dc/dc_perf_neu.txt	./data/dc/dc_perf_neg.txt
+pca_svm	0.7065598143927952	./data/dc/dc_price_pos.txt	./data/dc/dc_price_neu.txt	./data/dc/dc_price_neg.txt
+svm	0.5616575196934889	./data/dc/dc_price_pos.txt	./data/dc/dc_price_neu.txt	./data/dc/dc_price_neg.txt
+lstm	0.7590429042590275	./data/dc/dc_price_pos.txt	./data/dc/dc_price_neu.txt	./data/dc/dc_price_neg.txt
