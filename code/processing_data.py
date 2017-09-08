@@ -117,8 +117,6 @@ def proccess_laptops():
     return all_terms
 
 
+
 if __name__ == '__main__':
     all_term = proccess_laptops()
-    f = open('terms_list.txt', 'w')
-    for term in all_term:
-        f.write(term + '\n')
