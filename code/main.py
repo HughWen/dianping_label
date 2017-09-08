@@ -44,7 +44,7 @@ def build_data_cv(f_pos, f_neu, f_neg, cv=10):
     Loads the data and split into k folds.
     """
     docs = []
-    with open(f_pos) as f:
+    with open(f_pos, encoding='utf8') as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
@@ -52,7 +52,7 @@ def build_data_cv(f_pos, f_neu, f_neg, cv=10):
                 'text': line,
                 'split': np.random.randint(0, cv)}
             docs.append(doc)
-    with open(f_neu) as f:
+    with open(f_neu, encoding='utf8') as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
@@ -61,7 +61,7 @@ def build_data_cv(f_pos, f_neu, f_neg, cv=10):
                 'split': np.random.randint(0, cv)
             }
             docs.append(doc)
-    with open(f_neg) as f:
+    with open(f_neg, encoding='utf8') as f:
         for line in f:
             line = line.replace('\n', '')
             doc = {
