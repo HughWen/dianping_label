@@ -1,4 +1,4 @@
-name_corpus| type_corpus | name_model | shape_data | k_fold | accuracy
+name_corpus | type_corpus | name_model | shape_data | k_fold | accuracy
 -- | -- | -- | -- | -- | -- | --
 dc | appearance | svm | 399 | 5 | 90.03
 dc | quality | svm | 643 | 5 | 47.57

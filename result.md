@@ -1,4 +1,4 @@
-name_corpus| type_corpus | name_model | shape_data | k_fold | accuracy
+name_corpus | type_corpus | name_model | shape_data | k_fold | accuracy
 -- | -- | -- | -- | -- | -- | --
 dianping | food | svm | 5619 | 5 | 72.77
 dianping | env | svm | 1174 | 5 | 64.66
