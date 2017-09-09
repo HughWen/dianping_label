@@ -1,5 +1,5 @@
 from parsel import Selector
-
+import os
 
 def split_docs():
     with open('./lines_39554.txt', 'r') as f:
@@ -116,7 +116,15 @@ def proccess_laptops():
                 all_terms.append(term)
     return all_terms
 
+def stastic_lines():
+    f_list = os.listdir('./data/dc/')
+    for f_name in f_list:
+        print(f_name)
+        with open('./data/dc/'+f_name, 'r', encoding='utf-8') as f:
+            line_num = len(f.readlines())
+            print(line_num)
 
 
 if __name__ == '__main__':
-    all_term = proccess_laptops()
+    #all_term = proccess_laptops()
+    stastic_lines()
